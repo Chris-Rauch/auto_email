@@ -10,18 +10,14 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     __tablename__ = "users" #override table name to match mySQL table name
     user_id: int | None = Field(default=None, primary_key=True, index=True, nullable=False)
-    pass_hash: str = Field(nullable=False, max_length=255)
-<<<<<<< HEAD
+    password_hash: str = Field(nullable=False, max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False) # TODO utcnow is deprecated. Change for future use
-=======
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
->>>>>>> origin/main
 
 class UserPublic(UserBase):
     user_id: int
 
 class UserCreate(UserBase):
-    pass_hash: str
+    password_hash: str
 
 class UserUpdate(UserBase):
     username: str | None = Field(default=None, nullable=True, max_length=255)
