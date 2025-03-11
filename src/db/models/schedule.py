@@ -1,3 +1,4 @@
+import datetime
 from sqlmodel import SQLModel, Field
 
 class Schedule(SQLModel, table=True):

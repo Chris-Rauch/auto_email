@@ -6,9 +6,12 @@ from passlib.context import CryptContext
 
 # JWT (JSON Web Token authentication)
 jwt = dict(
-    secret_key = "My_super_secret_key"
-    algorithm = "HS256"
+    secret_key = "My_super_secret_key",
+    algorithm = "HS256",
     expire = 30 # expire time in minutes
 )
 # Don't know what this is yet
 context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# CONTAINS PASSWORD
+DATABASE_URL = "mysql+pymysql://chris:Musketeer123!@localhost:3306/emails"

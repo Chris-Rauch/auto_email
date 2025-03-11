@@ -10,7 +10,7 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     user_id: int | None = Field(default=None, primary_key=True, index=True, nullable=False)
     pass_hash: str = Field(nullable=False, max_length=255)
-    created_at: datetime = Field(default_factory=datetime.timezone.utc, nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 class UserPublic(UserBase):
     user_id: int
