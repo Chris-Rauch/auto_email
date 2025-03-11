@@ -5,12 +5,10 @@ python code to mySQL server.
 from typing import Annotated
 from fastapi import Depends
 from sqlmodel import SQLModel, create_engine, Session
-
-DATABASE_URL = "mysql://chris@localhost:3306/emails"
+from util.config import DATABASE_URL
 
 # create the engine
-connect_args = {"check_same_thread": False}
-engine = create_engine(DATABASE_URL, connect_args=connect_args, echo=True)
+engine = create_engine(DATABASE_URL, echo=True)
 
 def connect_to_db():
     SQLModel.metadata.create_all(engine)
