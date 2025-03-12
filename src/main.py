@@ -31,15 +31,15 @@ def create_user(user: UserCreate, session: SessionDep):
     If the user already exists, then the existing data is returned.
     """
     # check if user already exists
-    if queryUser(user, session) is None:
+    if queryUser(user, session) is not None:
         raise HTTPException(status_code=400, detail="User already exists")
     
     # hash password 
-    hashed_password = hash_password(user.password_plain)
+    hashed_password = hash_password(user.password)
 
     # create new user instance
     db_user = User.model_validate(user)
-    db_user.password_hash = hashed_password
+    db_user.password = hashed_password
 
     # add to users table in emails db
     session.add(db_user)
