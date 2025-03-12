@@ -3,9 +3,6 @@ from datetime import datetime
 
 class UserBase(SQLModel):
     username: str = Field(nullable=False, unique=True, max_length=255)
-    #email: str = Field(nullable=False, unique=True, max_length=255)
-    #first_name: str | None = Field(default=None, nullable=True, max_length=255)
-    #last_name: str | None = Field(default=None, nullable=True, max_length=255)
 
 class User(UserBase, table=True):
     __tablename__ = "users" #override table name to match mySQL table name

@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Response
 from db.models.users import User, UserLogin, UserPublic, UserUpdate, UserCreate
 from db.setup import SessionDep, connect_to_db
 from util.security import create_access_token, hash_password, verify_password
-from util.sql_queries import queryUser
+from util.sql_queries import queryUser, emailExists
 from dotenv import dotenv_values
 
 # load config values
@@ -31,9 +31,14 @@ def create_user(user: UserCreate, session: SessionDep):
     If the user already exists, then the existing data is returned.
     """
     # check if user already exists
-    if queryUser(user, session) is not None:
-        raise HTTPException(status_code=400, detail="User already exists")
-    
+    existing_user = queryUser(user, session)
+    if existing_user is not None:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    elif emailExists(user,session):
+        raise HTTPException(status_code=400, detail="Email already exists")
+
+    # TODO add a function that makes sure email, first and last are less than 255 chars
+
     # hash password 
     hashed_password = hash_password(user.password)
 
