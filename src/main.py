@@ -1,9 +1,13 @@
-from fastapi import FastAPI, HTTPException
-
-# mySQL models
-from db.models.users import User, UserPublic, UserUpdate
-from db.models.users import UserCreate
+from fastapi import FastAPI, HTTPException, Response
+from db.models.users import User, UserLogin, UserPublic, UserUpdate, UserCreate
 from db.setup import SessionDep, connect_to_db
+from util.security import create_access_token, hash_password, verify_password
+from util.sql_queries import queryUser
+from dotenv import dotenv_values
+
+# load config values
+config = dotenv_values(".env")
+DEBUG = True if config["DEBUG"] == "true" else False
 
 # init
 def lifespan(app: FastAPI):
@@ -18,11 +22,26 @@ app = FastAPI(lifespan=lifespan)
 """DATA ENTRY"""
 @app.post("/create_user", response_model=UserPublic)
 def create_user(user: UserCreate, session: SessionDep):
-    """Add a new user to the 'Users' table. 
-    Returns the user's id. If the user already exists, than the existing id
-    entry is returned.
+    """Add a new user to the 'Users' table. The plaintext password is hashed
+    before entering into db.
+
+    Returns:
+    A UserPublic, which includes the user_id, username, email, first
+    and last. Password hash and the created_at timestamp is ommited.
+    If the user already exists, then the existing data is returned.
     """
+    # check if user already exists
+    if queryUser(user, session) is None:
+        raise HTTPException(status_code=400, detail="User already exists")
+    
+    # hash password 
+    hashed_password = hash_password(user.password_plain)
+
+    # create new user instance
     db_user = User.model_validate(user)
+    db_user.password_hash = hashed_password
+
+    # add to users table in emails db
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
@@ -42,10 +61,44 @@ def update_user(user_id: int, user: UserUpdate, session: SessionDep):
     session.refresh(users_db)
     return users_db
 
-@app.get("/login")
-def login():
-    """login - Verify user credentials against 'emails' mySQL database. Return
-    some sort of verification key.
+@app.post("/login")
+def login(user: UserLogin, response: Response, session: SessionDep):
+    """Verify user credentials and return an access token.
     """
-    return {"message": "Trying to log in..."}
+    # query the user and verify
+    db_user = queryUser(user, session)
+    if not db_user:
+        raise HTTPException(status_code=401, detail="Invalid username")
+    if not verify_password(user.password_plain, db_user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid password")
+    
+    # create JWT token and add it to HTTP response
+    token = create_access_token(data={"sub": user.username})
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=not DEBUG,
+        samesite="lax"
+    )
 
+    return {"message": "Login successful"}
+
+"""
+from fastapi import Request
+
+@app.get("/protected")
+def protected_route(request: Request):
+    #An example route that requires a valid JWT token in cookies.
+    
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    payload = verify_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    return {"message": "You have access!", "user": payload["sub"]}
+
+"""
