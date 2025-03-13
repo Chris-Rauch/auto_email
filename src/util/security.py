@@ -21,7 +21,7 @@ def create_access_token(data: dict, expires: timedelta | None = None) -> str:
     """
     # set expiration time 
     if not expires:
-        expires = datetime.utcnow + timedelta(minutes=config["ACCESS_TOKEN_EXPIRES_MINUTES"])
+        expires = datetime.utcnow() + timedelta(minutes=int(config["ACCESS_TOKEN_EXPIRES_MINUTES"]))
 
     # encode data and return
     data_copy = data.copy()

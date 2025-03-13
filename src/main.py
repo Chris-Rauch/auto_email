@@ -74,7 +74,7 @@ def login(user: UserLogin, response: Response, session: SessionDep):
     db_user = queryUser(user, session)
     if not db_user:
         raise HTTPException(status_code=401, detail="Invalid username")
-    if not verify_password(user.password_plain, db_user.password_hash):
+    if not verify_password(user.password_plain, db_user.password):
         raise HTTPException(status_code=401, detail="Invalid password")
     
     # create JWT token and add it to HTTP response
@@ -87,7 +87,11 @@ def login(user: UserLogin, response: Response, session: SessionDep):
         samesite="lax"
     )
 
-    return {"message": "Login successful"}
+    responseBody = {"message": "Login successful"}
+    if DEBUG:
+        responseBody.update({"access_token": token}) # only return access token in debug mode
+
+    return responseBody
 
 """
 from fastapi import Request
@@ -105,5 +109,16 @@ def protected_route(request: Request):
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     
     return {"message": "You have access!", "user": payload["sub"]}
+
+"""
+"""
+Methods to add:
+    /emails
+        - POST, GET, PUT, DELETE
+    /users
+        - post, put
+    /templates
+        - post, get, put, delete
+
 
 """
