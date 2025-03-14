@@ -3,12 +3,14 @@ engine) and is what holds connections to the db. This is what connects the
 python code to mySQL server.
 """
 from typing import Annotated
+from dotenv import dotenv_values
 from fastapi import Depends
 from sqlmodel import SQLModel, create_engine, Session
-from util.config import DATABASE_URL
+
+config = dotenv_values(".env")
 
 # create the engine
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(config.get("DATABASE_URL"), echo=True)
 
 def connect_to_db():
     SQLModel.metadata.create_all(engine)

@@ -6,10 +6,10 @@ class UserBase(SQLModel):
 
 class User(UserBase, table=True):
     __tablename__ = "users" #override table name to match mySQL table name
+    user_id: int | None = Field(default=None, primary_key=True, index=True, nullable=False)
     email: str = Field(nullable=False, unique=True, max_length=255)
     first_name: str | None = Field(default=None, nullable=True, max_length=255)
     last_name: str | None = Field(default=None, nullable=True, max_length=255)
-    user_id: int | None = Field(default=None, primary_key=True, index=True, nullable=False)
     password: str = Field(nullable=False, max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False) # TODO utcnow is deprecated. Change for future use
 
