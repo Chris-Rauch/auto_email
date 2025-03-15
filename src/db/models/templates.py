@@ -2,7 +2,7 @@ from sqlmodel import SQLModel, Field
 
 class TemplateBase(SQLModel):
     name: str = Field(nullable=False)
-    subject: str = Field(default=None, nullable=False)
+    subject: str = Field(nullable=False)
     body: str = Field(nullable=False)
 
 class Templates(TemplateBase, table=True):
